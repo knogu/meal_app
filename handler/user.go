@@ -2,7 +2,8 @@ package handler
 
 import (
 	"net/http"
-	"github.com/gorilla/mux"
+	"meal_api/data"
+	"encoding/json"
 	"fmt"
 	"errors"
 )
@@ -11,13 +12,30 @@ var (
 	IsOrganizerErr = errors.New("usersへのPOSTリクエストのパラメータ is_organizer を指定してください")
 )
 
-func HandleUsersPost(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("handleUsersPost called")
-	is_organizer := mux.Vars(r)["is_organizer"]
-	// if  err != nil {
-	// 	http.Error(w, err.Error(), 400)
-	// }
-	if is_organizer == "true" {
+type UserPostRequestBody struct {
+	LineToken string `json:"line_token"`
+	IsCook bool `json:"is_cook"`
+	GetResponseNotifications bool `json:"get_response_notifications"`
+	Password string `json:"password"`
+}
 
+func GetUserPostBody(r *http.Request) UserPostRequestBody {
+	body := make([]byte, r.ContentLength)
+	r.Body.Read(body)
+	var rbody UserPostRequestBody
+	json.Unmarshal(body, &rbody)
+	return rbody
+}
+
+func HandleInvitedUserPost(w http.ResponseWriter, r *http.Request) {
+	rbody := GetUserPostBody(r)
+	fmt.Println(rbody)
+}
+
+func HandleOrganizersPost(w http.ResponseWriter, r *http.Request) {
+	rbody := GetUserPostBody(r)
+	err := data.CreateGroup(rbody.Password)
+	if err != nil {
+		fmt.Println(err)
 	}
 }

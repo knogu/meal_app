@@ -8,9 +8,11 @@ import (
 	"gorm.io/gorm"
 )
 
+var db *gorm.DB
 func DBinit() {
 	dsn := "meal:password@tcp(db:3306)/meal?charset=utf8&parseTime=True&loc=Local"
-	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
+	var err error
+	db, err = gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {
 		log.Fatal(err)
 	} else {
