@@ -8,6 +8,6 @@ type User struct {
 	LineName string
 	PictureURL string
 	IsCook bool
-	GroupUUID string `gorm:"size:36"`
-	UserGroup UserGroup `gorm:"foreignKey:GroupUUID"`
+	TeamUUID string `gorm:"size:36"`
+	Team Team `gorm:"foreignKey:TeamUUID"`
 }

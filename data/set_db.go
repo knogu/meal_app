@@ -19,6 +19,5 @@ func DBinit() {
 		fmt.Println("db connection succeeded")
 	}
 
-	db.AutoMigrate(&UserGroup{}, &User{})
-	// db.Create(&User{LineID: "1", LineName: "kotaro", GroupUuId: "11", IsCook: false})
+	db.AutoMigrate(&Team{}, &User{})
 }

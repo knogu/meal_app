@@ -34,11 +34,10 @@ func HandleInvitedUserPost(w http.ResponseWriter, r *http.Request) {
 
 func HandleOrganizersPost(w http.ResponseWriter, r *http.Request) {
 	rbody := GetUserPostBody(r)
-	var group data.UserGroup
-	err := group.CreateGroup(rbody.Password)
-	fmt.Println(group.UUID)
-	
+	var team data.Team
+	err := team.Create(rbody.Password)
 	if err != nil {
 		fmt.Println(err)
 	}
+	
 }
