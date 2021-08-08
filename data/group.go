@@ -11,14 +11,13 @@ type UserGroup struct {
 	Password string `gorm:"size:60"`
 }
 
-func CreateGroup(password string) error {
+func (group *UserGroup) CreateGroup(password string) error {
 	hashed, _ := bcrypt.GenerateFromPassword([]byte(password),12)
+	group.Password = string(hashed)
 	u, _ := uuid.NewRandom()
 	uu := u.String()
-    group := UserGroup{UUID: uu, Password: string(hashed)}
-	fmt.Println("pointer")
-	fmt.Println(&group)
+    group.UUID = uu
 	result := db.Create(&group)
-	fmt.Println("created")
+	fmt.Println(result.Error)
 	return result.Error
 }
