@@ -1,0 +1,37 @@
+version: '3'
+services:
+  go:
+    build:
+      context: .
+      # dockerfile: Dockerfile_${DOCKER_GO_ENV}
+    container_name: go_host
+    stdin_open: true
+    tty: true
+    volumes:
+      - .:/app
+    ports:
+      - "80:80"
+    restart: always
+    depends_on:
+      - "db"
+  db:
+    image: mysql:8.0
+    container_name: mysql_host
+    hostname: db-server
+    volumes:
+      # - ./db/sql:/docker-entrypoint-initdb.d
+      - ./db/my.cnf:/etc/mysql/conf.d/my.cnf
+      - db-data:/var/lib/mysql
+    environment:
+      MYSQL_DATABASE: meal
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_USER: meal
+      MYSQL_PASSWORD: password
+      TZ: 'Asia/Tokyo'
+    command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    ports:
+      - 3306:3306
+
+volumes:
+  db-data:
+    driver: local
