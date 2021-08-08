@@ -1,12 +1,9 @@
 package data
 
 import (
-	"errors"
-	"gorm.io/gorm"
 )
 
-type Group struct {
-	gorm.Model
-	UUID string
+type UserGroup struct {
+	UUID string `gorm:"primaryKey"`
 	Password string
 }
