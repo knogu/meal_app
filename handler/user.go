@@ -5,32 +5,19 @@ import (
 	"errors"
 	"fmt"
 	"meal_api/data"
+	"meal_api/json_structs"
 	"net/http"
 
+	"github.com/gorilla/mux"
+	"golang.org/x/crypto/bcrypt"
 	"gopkg.in/go-playground/validator.v9"
+	"gorm.io/gorm"
 )
 
-var (
-	IsOrganizerErr = errors.New("usersへのPOSTリクエストのパラメータ is_organizer を指定してください")
-)
-
-type UserPostRequestBody struct {
-	LineToken                string `json:"line_token" validate:"required"`
-	IsCook                   bool   `json:"is_cook" validate:"required"`
-	GetResponseNotifications bool   `json:"get_response_notifications" validate:"required"`
-	Password                 string `json:"password" validate:"required,min=8,max=30"`
-}
-
-type LineProfile struct {
-	LineID     string
-	LineName   string
-	PictureURL string
-}
-
-func ReadUserPostBody(r *http.Request) (UserPostRequestBody, error) {
+func ReadUserPostBody(r *http.Request) (json_structs.UserPostRequestBody, error) {
 	body := make([]byte, r.ContentLength)
 	r.Body.Read(body)
-	var rbody UserPostRequestBody
+	var rbody json_structs.UserPostRequestBody
 	err := json.Unmarshal(body, &rbody)
 	if err != nil {
 		fmt.Printf(err.Error())
@@ -43,14 +30,39 @@ func ReadUserPostBody(r *http.Request) (UserPostRequestBody, error) {
 	return rbody, err
 }
 
-func HandleInvitedUserPost(w http.ResponseWriter, r *http.Request) {
-	// rbody, err := ReadUserPostBody(r)
-	// fmt.Println(rbody)
+func return400(w http.ResponseWriter) {
+	w.WriteHeader(400)
+	w.Header().Set("Content-Type", "application/json")
+	return
 }
 
-func FetchLineProfile(LineToken string) LineProfile {
-	// todo: LINE platformから取得するように変更
-	return LineProfile{LineID: "id" + LineToken, LineName: "name" + LineToken, PictureURL: "url" + LineToken}
+func HandleInvitedUserPost(w http.ResponseWriter, r *http.Request) {
+	rbody, err := ReadUserPostBody(r)
+	if err != nil {
+		return400(w)
+		return
+	}
+	team_uuid := mux.Vars(r)["team_uuid"]
+	var team data.Team
+	result := data.Db.Where("uuid = ?", team_uuid).First(&team)
+	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+		fmt.Println("team not found")
+		return400(w)
+		return
+	}
+
+	err = bcrypt.CompareHashAndPassword([]byte(team.Password), []byte(rbody.Password))
+	if err != nil {
+		return400(w)
+		return
+	}
+
+	_, err = data.CreateUserByRequestBody(rbody, team.UUID)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	return
 }
 
 type ReturnToOrganizerPost struct {
@@ -69,20 +81,8 @@ func HandleOrganizersPost(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		fmt.Println(err)
 	}
-
-	line_profile := FetchLineProfile(rbody.LineToken)
-	user := data.User{
-		LineID:                   line_profile.LineID,
-		LineName:                 line_profile.LineName,
-		PictureURL:               line_profile.PictureURL,
-		IsCook:                   rbody.IsCook,
-		GetResponseNotifications: rbody.GetResponseNotifications,
-		TeamUUID:                 team.UUID,
-	}
-	Result := data.Db.Create(&user)
-	if Result.Error != nil {
-		fmt.Println(Result.Error)
-	}
+	user := data.User{IsCook: rbody.IsCook, GetResponseNotifications: rbody.GetResponseNotifications, TeamUUID: team.UUID}
+	user.CreateByLineToken(rbody.LineToken)
 
 	output, err := json.MarshalIndent(ReturnToOrganizerPost{UUID: team.UUID}, "", "\t\t")
 	if err != nil {
