@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"meal_api/data"
 	"net/http"
+
+	"gopkg.in/go-playground/validator.v9"
 )
 
 var (
@@ -13,10 +15,10 @@ var (
 )
 
 type UserPostRequestBody struct {
-	LineToken                string `json:"line_token"`
-	IsCook                   bool   `json:"is_cook"`
-	GetResponseNotifications bool   `json:"get_response_notifications"`
-	Password                 string `json:"password"`
+	LineToken                string `json:"line_token" validate:"required"`
+	IsCook                   bool   `json:"is_cook" validate:"required"`
+	GetResponseNotifications bool   `json:"get_response_notifications" validate:"required"`
+	Password                 string `json:"password" validate:"required, min=8, max=30"`
 }
 
 type LineProfile struct {
@@ -25,7 +27,7 @@ type LineProfile struct {
 	PictureURL string
 }
 
-func ReadUserPostBody(r *http.Request) UserPostRequestBody {
+func ReadUserPostBody(r *http.Request) (UserPostRequestBody, error) {
 	body := make([]byte, r.ContentLength)
 	r.Body.Read(body)
 	var rbody UserPostRequestBody
@@ -33,12 +35,17 @@ func ReadUserPostBody(r *http.Request) UserPostRequestBody {
 	if err != nil {
 		fmt.Printf(err.Error())
 	}
-	return rbody
+	validate := validator.New()
+	err = validate.Struct(rbody)
+	if err != nil {
+		fmt.Printf(err.Error())
+	}
+	return rbody, err
 }
 
 func HandleInvitedUserPost(w http.ResponseWriter, r *http.Request) {
-	rbody := ReadUserPostBody(r)
-	fmt.Println(rbody)
+	// rbody, err := ReadUserPostBody(r)
+	// fmt.Println(rbody)
 }
 
 func FetchLineProfile(LineToken string) LineProfile {
@@ -51,9 +58,14 @@ type ReturnToOrganizerPost struct {
 }
 
 func HandleOrganizersPost(w http.ResponseWriter, r *http.Request) {
-	rbody := ReadUserPostBody(r)
+	rbody, err := ReadUserPostBody(r)
+	if err != nil {
+		w.WriteHeader(400)
+		w.Header().Set("Content-Type", "application/json")
+		return
+	}
 	var team data.Team
-	err := team.Create(rbody.Password)
+	err = team.Create(rbody.Password)
 	if err != nil {
 		fmt.Println(err)
 	}
