@@ -23,17 +23,6 @@ func FetchLineProfile(LineToken string) LineProfile {
 	return LineProfile{LineID: "id" + LineToken, LineName: "name" + LineToken, PictureURL: "url" + LineToken}
 }
 
-func (user User) CreateByLineToken(LineToken string) error {
-	line_profile := FetchLineProfile(LineToken)
-	user.LineID = line_profile.LineID
-	user.LineName = line_profile.LineName
-	user.PictureURL = line_profile.PictureURL
-
-	Result := Db.Create(&user)
-
-	return Result.Error
-}
-
 func CreateUserByRequestBody(rbody json_structs.UserPostRequestBody, team_uuid string) (User, error) {
 	line_profile := FetchLineProfile(rbody.LineToken)
 	user := User{
