@@ -18,7 +18,7 @@ type UserPostRequestBody struct {
 	LineToken                string `json:"line_token" validate:"required"`
 	IsCook                   bool   `json:"is_cook" validate:"required"`
 	GetResponseNotifications bool   `json:"get_response_notifications" validate:"required"`
-	Password                 string `json:"password" validate:"required, min=8, max=30"`
+	Password                 string `json:"password" validate:"required,min=8,max=30"`
 }
 
 type LineProfile struct {
