@@ -1,13 +1,11 @@
 package data
 
-import (
-)
-
 type User struct {
-	LineID string `gorm:"primaryKey"`
-	LineName string
-	PictureURL string
-	IsCook bool
-	TeamUUID string `gorm:"size:36"`
-	Team Team `gorm:"foreignKey:TeamUUID"`
+	LineID                   string `gorm:"primaryKey"`
+	LineName                 string
+	PictureURL               string
+	IsCook                   bool
+	GetResponseNotifications bool
+	TeamUUID                 string `gorm:"size:36"`
+	Team                     Team   `gorm:"foreignKey:TeamUUID"`
 }
