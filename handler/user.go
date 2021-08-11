@@ -85,3 +85,19 @@ func HandleOrganizersPost(w http.ResponseWriter, r *http.Request) {
 	w.Write(output)
 	return
 }
+
+func HandleUsersPut(w http.ResponseWriter, r *http.Request) {
+	user_id := mux.Vars(r)["user_id"]
+	var params json_structs.UserPutParams
+	params.ReadRequestBody(r)
+	err := data.IsAuthorized(user_id, params.LineToken)
+	if err != nil {
+		handleError(w, err)
+	}
+
+	err = data.UpdateUserSetting(user_id, params.UserSettings)
+	if err != nil {
+		handleError(w, err)
+	}
+	return
+}

@@ -13,8 +13,10 @@ func main() {
 	data.DBinit()
 
 	r := mux.NewRouter()
+	// user
 	r.HandleFunc("/invited_users/{team_uuid}", handler.HandleInvitedUserPost)
 	r.HandleFunc("/organizers", handler.HandleOrganizersPost)
+	r.HandleFunc("/users/{user_id}", handler.HandleUsersPut)
 
 	http.ListenAndServe(":80", r)
 }

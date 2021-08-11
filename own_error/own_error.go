@@ -68,7 +68,7 @@ type TeamNotFound struct {
 }
 
 func (teamNotFound TeamNotFound) StatusCode() int {
-	return 400
+	return 404
 }
 
 func (teamNotFound TeamNotFound) Summary() string {
@@ -76,7 +76,35 @@ func (teamNotFound TeamNotFound) Summary() string {
 }
 
 func (teamNotFound TeamNotFound) Detail() string {
-	return ""
+	return teamNotFound.Detail_
+}
+
+type UserNotFound struct {
+	Detail_ string
+}
+
+func (userNotFound UserNotFound) StatusCode() int {
+	return 404
+}
+func (userNotFound UserNotFound) Summary() string {
+	return "user not found"
+}
+func (userNotFound UserNotFound) Detail() string {
+	return userNotFound.Detail_
+}
+
+type NotAuthorized struct {
+	Detail_ string
+}
+
+func (notAuthorized NotAuthorized) StatusCode() int {
+	return 403
+}
+func (notAuthorized NotAuthorized) Summary() string {
+	return "you are not authorized"
+}
+func (notAuthorized NotAuthorized) Detail() string {
+	return notAuthorized.Detail_
 }
 
 type BadRequestError struct {
