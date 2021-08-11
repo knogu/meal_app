@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"meal_api/own_error"
 	"net/http"
+	"time"
 
 	"github.com/pkg/errors"
 	"gopkg.in/go-playground/validator.v9"
@@ -28,6 +29,31 @@ type UserPutParams struct {
 
 // ↓ 取得したparamの内容を取得するために、paramsを参照渡ししてメソッド定義
 func (params *UserPutParams) ReadRequestBody(r *http.Request) (err error) {
+	body := make([]byte, r.ContentLength)
+	r.Body.Read(body)
+	err = json.Unmarshal(body, &params)
+	if err != nil {
+		errtype := own_error.JsonFormatNotValid{Detail_: err.Error()}
+		err = errors.WithStack(own_error.BadRequestError{Detail: errtype})
+	}
+
+	validate := validator.New()
+	err = validate.Struct(params)
+	if err != nil {
+		errtype := own_error.ParamNotValid{Detail_: err.Error()}
+		err = errors.WithStack(own_error.BadRequestError{Detail: errtype})
+	}
+	return err
+}
+
+type SpecifiedResponseParams struct {
+	LineToken string    `json:"line_token" validate:"required"`
+	EventID   int       `json:"event_id"`
+	Date      time.Time `json:"date"`
+	IsNeeded  bool      `json:"is_needed"`
+}
+
+func (params *SpecifiedResponseParams) ReadRequestBody(r *http.Request) (err error) {
 	body := make([]byte, r.ContentLength)
 	r.Body.Read(body)
 	err = json.Unmarshal(body, &params)

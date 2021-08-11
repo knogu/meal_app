@@ -17,6 +17,7 @@ func main() {
 	r.HandleFunc("/invited_users/{team_uuid}", handler.HandleInvitedUserPost)
 	r.HandleFunc("/organizers", handler.HandleOrganizersPost)
 	r.HandleFunc("/users/{user_id}", handler.HandleUsersPut)
+	r.HandleFunc("/users/{user_id}/responses", handler.HandleResponses)
 
 	http.ListenAndServe(":80", r)
 }

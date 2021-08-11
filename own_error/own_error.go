@@ -107,6 +107,20 @@ func (notAuthorized NotAuthorized) Detail() string {
 	return notAuthorized.Detail_
 }
 
+type MethodNotAllowed struct {
+	Detail_ string
+}
+
+func (methodNotAllowed MethodNotAllowed) StatusCode() int {
+	return 405
+}
+func (methodNotAllowed MethodNotAllowed) Summary() string {
+	return "Method not allowed"
+}
+func (methodNotAllowed MethodNotAllowed) Detail() string {
+	return methodNotAllowed.Detail_
+}
+
 type BadRequestError struct {
 	Detail SpecifiedBadRequest
 }

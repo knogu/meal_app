@@ -14,10 +14,10 @@ var (
 
 type Response struct {
 	gorm.Model
-	EventID  int
+	EventID  int `gorm:"primaryKey"`
 	Event    Event
-	UserID   int
+	UserID   int `gorm:"primaryKey"`
 	User     User
+	Date     time.Time `gorm:"primaryKey"`
 	IsNeeded bool
-	Date     time.Time
 }
