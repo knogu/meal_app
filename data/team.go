@@ -1,7 +1,10 @@
 package data
 
 import (
+	"meal_api/own_error"
+
 	"github.com/google/uuid"
+	"github.com/pkg/errors"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -11,22 +14,38 @@ type Team struct {
 }
 
 func (team *Team) PasswordIsValid(password string) error {
-	return bcrypt.CompareHashAndPassword([]byte(team.Password), []byte(password))
+	err := bcrypt.CompareHashAndPassword([]byte(team.Password), []byte(password))
+	if err != nil {
+		return own_error.BadRequestError{Detail: own_error.WrongPassword{}}
+	}
+	return nil
 }
 
 func FetchTeamByUUid(uuid string) (Team, error) {
 	var team Team
+	var err error
 	result := Db.Where("uuid = ?", uuid).First(&team)
-	return team, result.Error
+	if result.Error != nil {
+		err = own_error.BadRequestError{Detail: own_error.TeamNotFound{Detail_: result.Error.Error()}}
+	}
+	return team, err
 }
 
 func CreateTeamByPassword(password string) (Team, error) {
 	var team Team
-	hashed, _ := bcrypt.GenerateFromPassword([]byte(password), 12)
+	hashed, err := bcrypt.GenerateFromPassword([]byte(password), 12)
+	if err != nil {
+		return team, errors.WithStack(err)
+	}
+
 	team.Password = string(hashed)
-	u, _ := uuid.NewRandom()
+	u, err := uuid.NewRandom()
+	if err != nil {
+		return team, errors.WithStack(err)
+	}
+
 	uu := u.String()
 	team.UUID = uu
 	result := Db.Create(&team)
-	return team, result.Error
+	return team, errors.WithStack(result.Error)
 }

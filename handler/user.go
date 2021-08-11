@@ -2,12 +2,13 @@ package handler
 
 import (
 	"encoding/json"
-	"fmt"
 	"meal_api/data"
 	"meal_api/json_structs"
+	"meal_api/own_error"
 	"net/http"
 
 	"github.com/gorilla/mux"
+	"github.com/pkg/errors"
 	"gopkg.in/go-playground/validator.v9"
 )
 
@@ -17,46 +18,39 @@ func ReadUserPostBody(r *http.Request) (json_structs.UserPostRequestBody, error)
 	var rbody json_structs.UserPostRequestBody
 	err := json.Unmarshal(body, &rbody)
 	if err != nil {
-		fmt.Printf(err.Error())
+		errtype := own_error.JsonFormatNotValid{Detail_: err.Error()}
+		return rbody, errors.WithStack(own_error.BadRequestError{Detail: errtype})
 	}
+
 	validate := validator.New()
 	err = validate.Struct(rbody)
 	if err != nil {
-		fmt.Printf(err.Error())
+		errtype := own_error.ParamNotValid{Detail_: err.Error()}
+		return rbody, errors.WithStack(own_error.BadRequestError{Detail: errtype})
 	}
-	return rbody, err
-}
-
-func return400(w http.ResponseWriter) {
-	w.WriteHeader(400)
-	w.Header().Set("Content-Type", "application/json")
-	return
+	return rbody, nil
 }
 
 func HandleInvitedUserPost(w http.ResponseWriter, r *http.Request) {
 	rbody, err := ReadUserPostBody(r)
 	if err != nil {
-		return400(w)
-		return
+		handleError(w, err)
 	}
 
 	team_uuid := mux.Vars(r)["team_uuid"]
 	team, err := data.FetchTeamByUUid(team_uuid)
 	if err != nil {
-		fmt.Println("team not found")
-		return400(w)
-		return
+		handleError(w, err)
 	}
 
 	err = team.PasswordIsValid(rbody.Password)
 	if err != nil {
-		return400(w)
-		return
+		handleError(w, err)
 	}
 
 	_, err = data.CreateUserByRequestBody(rbody, team.UUID)
 	if err != nil {
-		fmt.Println(err)
+		handleError(w, err)
 	}
 
 	return
@@ -69,24 +63,23 @@ type ReturnToOrganizerPost struct {
 func HandleOrganizersPost(w http.ResponseWriter, r *http.Request) {
 	rbody, err := ReadUserPostBody(r)
 	if err != nil {
-		w.WriteHeader(400)
-		w.Header().Set("Content-Type", "application/json")
+		handleError(w, err)
 		return
 	}
 
 	team, err := data.CreateTeamByPassword(rbody.Password)
 	if err != nil {
-		fmt.Println(err)
+		handleError(w, err)
 	}
 
 	_, err = data.CreateUserByRequestBody(rbody, team.UUID)
 	if err != nil {
-		fmt.Println(err)
+		handleError(w, err)
 	}
 
 	output, err := json.MarshalIndent(ReturnToOrganizerPost{UUID: team.UUID}, "", "\t\t")
 	if err != nil {
-		fmt.Println(err)
+		handleError(w, err)
 	}
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(output)

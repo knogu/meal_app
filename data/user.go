@@ -1,6 +1,10 @@
 package data
 
-import "meal_api/json_structs"
+import (
+	"meal_api/json_structs"
+
+	"github.com/pkg/errors"
+)
 
 type User struct {
 	LineID                   string `gorm:"primaryKey"`
@@ -35,5 +39,5 @@ func CreateUserByRequestBody(rbody json_structs.UserPostRequestBody, team_uuid s
 	}
 	Result := Db.Create(&user)
 
-	return user, Result.Error
+	return user, errors.WithStack(Result.Error)
 }
