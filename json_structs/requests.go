@@ -26,7 +26,7 @@ type UserPutParams struct {
 	UserSettings UserSettings `json:"user_settings"`
 }
 
-// ↓ *UserPutParams を UserPutParams にするとバグる、なぜ？
+// ↓ 取得したparamの内容を取得するために、paramsを参照渡ししてメソッド定義
 func (params *UserPutParams) ReadRequestBody(r *http.Request) (err error) {
 	body := make([]byte, r.ContentLength)
 	r.Body.Read(body)
