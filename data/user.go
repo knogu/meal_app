@@ -15,7 +15,7 @@ type User struct {
 	IsCook                   bool
 	GetResponseNotifications bool
 	TeamUUID                 string `gorm:"size:36"`
-	Team                     Team   `gorm:"foreignKey:TeamUUID"`
+	Team                     Team
 }
 
 type LineProfile struct {
