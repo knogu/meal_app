@@ -49,3 +49,14 @@ func CreateTeamByPassword(password string) (Team, error) {
 	result := Db.Create(&team)
 	return team, errors.WithStack(result.Error)
 }
+
+func (team Team) CreateDefaultEvents() (err error) {
+	lunch := Event{Team: team, Sort: 1, Name: "lunch"}
+	result := Db.Create(&lunch)
+	if result.Error != nil {
+		return errors.WithStack(result.Error)
+	}
+	dinner := Event{Team: team, Sort: 1, Name: "dinner"}
+	result = Db.Create(&dinner)
+	return result.Error
+}

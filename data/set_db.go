@@ -20,5 +20,5 @@ func DBinit() {
 		fmt.Println("Db connection succeeded")
 	}
 
-	Db.AutoMigrate(&Team{}, &User{})
+	Db.AutoMigrate(&Team{}, &User{}, &Event{})
 }

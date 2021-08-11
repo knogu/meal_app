@@ -77,6 +77,11 @@ func HandleOrganizersPost(w http.ResponseWriter, r *http.Request) {
 		handleError(w, err)
 	}
 
+	err = team.CreateDefaultEvents()
+	if err != nil {
+		handleError(w, err)
+	}
+
 	output, err := json.MarshalIndent(ReturnToOrganizerPost{UUID: team.UUID}, "", "\t\t")
 	if err != nil {
 		handleError(w, err)
