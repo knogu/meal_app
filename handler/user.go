@@ -14,21 +14,25 @@ func HandleInvitedUserPost(c *gin.Context) {
 	team, err := data.FetchTeamByUUid(team_uuid)
 	if err != nil {
 		handleError(c, err)
+		return
 	}
 
 	params, err := json_structs.NewUserPostRequestBody(c)
 	if err != nil {
 		handleError(c, err)
+		return
 	}
 
 	err = team.PasswordIsValid(params.Password)
 	if err != nil {
 		handleError(c, err)
+		return
 	}
 
 	_, err = data.CreateUserByRequestBody(params, team.UUID)
 	if err != nil {
 		handleError(c, err)
+		return
 	}
 
 	return
@@ -48,21 +52,25 @@ func HandleOrganizersPost(c *gin.Context) {
 	team, err := data.CreateTeamByPassword(params.Password)
 	if err != nil {
 		handleError(c, err)
+		return
 	}
 
 	_, err = data.CreateUserByRequestBody(params, team.UUID)
 	if err != nil {
 		handleError(c, err)
+		return
 	}
 
 	err = team.CreateDefaultEvents()
 	if err != nil {
 		handleError(c, err)
+		return
 	}
 
 	output, err := json.MarshalIndent(ReturnToOrganizerPost{UUID: team.UUID}, "", "\t\t")
 	if err != nil {
 		handleError(c, err)
+		return
 	}
 	c.JSON(http.StatusOK, output)
 	return
@@ -73,11 +81,13 @@ func HandleUsersPut(c *gin.Context) {
 	params, err := json_structs.NewUserPutParams(c)
 	if err != nil {
 		handleError(c, err)
+		return
 	}
 
 	err = data.IsAuthorized(user_id, params.LineToken)
 	if err != nil {
 		handleError(c, err)
+		return
 	}
 
 	err = data.UpdateUserSetting(user_id, params.UserSettings)

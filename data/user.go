@@ -2,7 +2,7 @@ package data
 
 import (
 	"meal_api/json_structs"
-	"meal_api/own_error"
+	"meal_api/xer"
 
 	"github.com/pkg/errors"
 	"gorm.io/gorm"
@@ -46,7 +46,7 @@ func CreateUserByRequestBody(rbody json_structs.UserPostRequestBody, team_uuid s
 
 func IsAuthorized(userIdByPath string, userIdByToken string) (err error) {
 	if userIdByPath != userIdByToken {
-		err = errors.WithStack(own_error.BadRequestError{ErrDescription: own_error.NotAuthorized{}})
+		err = errors.WithStack(xer.Err4xx{ErrType: xer.NotAuthorized})
 	}
 	return err
 }
@@ -54,8 +54,7 @@ func IsAuthorized(userIdByPath string, userIdByToken string) (err error) {
 func FetchUserById(user_id string) (user User, err error) {
 	Result := Db.First(&user, "line_id=?", user_id)
 	if errors.Is(Result.Error, gorm.ErrRecordNotFound) {
-		err_type := own_error.UserNotFound{}
-		err = own_error.BadRequestError{ErrDescription: err_type}
+		err = errors.WithStack(xer.Err4xx{ErrType: xer.UserNotFound})
 	}
 	return user, errors.WithStack(err)
 }
@@ -82,7 +81,7 @@ func UserIsAuthorizedEvents(eventID int, userIDByToken string) (err error) {
 	}
 
 	if user.TeamUUID != event.TeamUUID {
-		err = errors.WithStack(own_error.BadRequestError{ErrDescription: own_error.NotAuthorized{}})
+		err = errors.WithStack(xer.Err4xx{ErrType: xer.NotAuthorized})
 	}
 	return err
 }

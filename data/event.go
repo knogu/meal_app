@@ -1,7 +1,7 @@
 package data
 
 import (
-	"meal_api/own_error"
+	"meal_api/xer"
 
 	"github.com/pkg/errors"
 	"gorm.io/gorm"
@@ -18,8 +18,7 @@ type Event struct {
 func FetchEventById(id int) (event Event, err error) {
 	Result := Db.First(&event, id)
 	if errors.Is(Result.Error, gorm.ErrRecordNotFound) {
-		err_type := own_error.EventNotFound{}
-		err = own_error.BadRequestError{ErrDescription: err_type}
+		err = xer.Err4xx{ErrType: xer.EventNotFound}
 	}
 	return event, errors.WithStack(err)
 }

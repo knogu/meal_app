@@ -1,7 +1,7 @@
 package handler
 
 import (
-	"meal_api/own_error"
+	"meal_api/xer"
 
 	"github.com/gin-gonic/gin"
 	"github.com/pkg/errors"
@@ -9,9 +9,9 @@ import (
 
 func handleError(c *gin.Context, err error) {
 	switch cause := errors.Cause(err).(type) {
-	case own_error.BadRequestError:
+	case xer.Err4xx:
 		cause.Return(c)
 	default:
-		own_error.Process500(c, err)
+		xer.Process500(c, err)
 	}
 }

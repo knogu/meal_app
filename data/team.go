@@ -1,11 +1,12 @@
 package data
 
 import (
-	"meal_api/own_error"
+	"meal_api/xer"
 
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
 	"golang.org/x/crypto/bcrypt"
+	"gorm.io/gorm"
 )
 
 type Team struct {
@@ -16,7 +17,7 @@ type Team struct {
 func (team *Team) PasswordIsValid(password string) error {
 	err := bcrypt.CompareHashAndPassword([]byte(team.Password), []byte(password))
 	if err != nil {
-		return own_error.BadRequestError{ErrDescription: own_error.WrongPassword{}}
+		err = xer.Err4xx{ErrType: xer.WrongPassword}
 	}
 	return nil
 }
@@ -25,8 +26,8 @@ func FetchTeamByUUid(uuid string) (Team, error) {
 	var team Team
 	var err error
 	result := Db.Where("uuid = ?", uuid).First(&team)
-	if result.Error != nil {
-		err = own_error.BadRequestError{ErrDescription: own_error.TeamNotFound{Detail_: result.Error.Error()}}
+	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+		err = xer.Err4xx{ErrType: xer.TeamNotFound}
 	}
 	return team, err
 }

@@ -12,17 +12,20 @@ func HandleResponsesPost(c *gin.Context) {
 	params, err := json_structs.NewSpecifiedResponseParams(c)
 	if err != nil {
 		handleError(c, err)
+		return
 	}
 	userIDByToken := data.FetchLineProfile(params.LineToken).LineID
 
 	err = AuthorizeResponses(userIDByPath, userIDByToken, params.EventID)
 	if err != nil {
 		handleError(c, err)
+		return
 	}
 
 	_, err = data.CreateResponseByParams(userIDByToken, params)
 	if err != nil {
 		handleError(c, err)
+		return
 	}
 
 	return
@@ -33,12 +36,14 @@ func HandleResponsesPut(c *gin.Context) {
 	params, err := json_structs.NewSpecifiedResponseParams(c)
 	if err != nil {
 		handleError(c, err)
+		return
 	}
 	userIDByToken := data.FetchLineProfile(params.LineToken).LineID
 
 	err = AuthorizeResponses(userIDByPath, userIDByToken, params.EventID)
 	if err != nil {
 		handleError(c, err)
+		return
 	}
 
 	data.Db.Model(&data.Response{}).Where("user_id=? and event_id=? and date=?", userIDByToken, params.EventID, params.Date).Update("is_needed", params.IsNeeded)

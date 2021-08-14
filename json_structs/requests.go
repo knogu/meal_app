@@ -1,7 +1,7 @@
 package json_structs
 
 import (
-	"meal_api/own_error"
+	"meal_api/xer"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -19,16 +19,14 @@ type UserPostRequestBody struct {
 func NewUserPostRequestBody(c *gin.Context) (params UserPostRequestBody, err error) {
 	c.ShouldBindJSON(&params)
 	if err != nil {
-		errtype := own_error.JsonFormatNotValid{Detail_: err.Error()}
-		err = errors.WithStack(own_error.BadRequestError{ErrDescription: errtype})
+		err = errors.WithStack(xer.Err4xx{ErrType: xer.JsonFormatInvalid, Detail: err.Error()})
 		return
 	}
 
 	validate := validator.New()
 	err = validate.Struct(params)
 	if err != nil {
-		errtype := own_error.ParamNotValid{Detail_: err.Error()}
-		err = errors.WithStack(own_error.BadRequestError{ErrDescription: errtype})
+		err = errors.WithStack(xer.Err4xx{ErrType: xer.ParamInvalid, Detail: err.Error()})
 	}
 	return
 }
@@ -46,16 +44,14 @@ type UserPutParams struct {
 func NewUserPutParams(c *gin.Context) (params UserPutParams, err error) {
 	c.ShouldBindJSON(&params)
 	if err != nil {
-		errtype := own_error.JsonFormatNotValid{Detail_: err.Error()}
-		err = errors.WithStack(own_error.BadRequestError{ErrDescription: errtype})
+		err = errors.WithStack(xer.Err4xx{ErrType: xer.JsonFormatInvalid, Detail: err.Error()})
 		return
 	}
 
 	validate := validator.New()
 	err = validate.Struct(params)
 	if err != nil {
-		errtype := own_error.ParamNotValid{Detail_: err.Error()}
-		err = errors.WithStack(own_error.BadRequestError{ErrDescription: errtype})
+		err = errors.WithStack(xer.Err4xx{ErrType: xer.ParamInvalid, Detail: err.Error()})
 	}
 	return
 }
@@ -70,16 +66,14 @@ type ResponsesParams struct {
 func NewSpecifiedResponseParams(c *gin.Context) (params ResponsesParams, err error) {
 	c.ShouldBindJSON(&params)
 	if err != nil {
-		errtype := own_error.JsonFormatNotValid{Detail_: err.Error()}
-		err = errors.WithStack(own_error.BadRequestError{ErrDescription: errtype})
+		err = errors.WithStack(xer.Err4xx{ErrType: xer.JsonFormatInvalid, Detail: err.Error()})
 		return
 	}
 
 	validate := validator.New()
 	err = validate.Struct(params)
 	if err != nil {
-		errtype := own_error.ParamNotValid{Detail_: err.Error()}
-		err = errors.WithStack(own_error.BadRequestError{ErrDescription: errtype})
+		err = errors.WithStack(xer.Err4xx{ErrType: xer.ParamInvalid, Detail: err.Error()})
 	}
 	return
 }
