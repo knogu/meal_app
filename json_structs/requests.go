@@ -1,11 +1,10 @@
 package json_structs
 
 import (
-	"encoding/json"
 	"meal_api/own_error"
-	"net/http"
 	"time"
 
+	"github.com/gin-gonic/gin"
 	"github.com/pkg/errors"
 	"gopkg.in/go-playground/validator.v9"
 )
@@ -15,6 +14,23 @@ type UserPostRequestBody struct {
 	IsCook                   bool   `json:"is_cook"`
 	GetResponseNotifications bool   `json:"get_response_notifications"`
 	Password                 string `json:"password" validate:"required,min=8,max=30"`
+}
+
+func NewUserPostRequestBody(c *gin.Context) (params UserPostRequestBody, err error) {
+	c.ShouldBindJSON(&params)
+	if err != nil {
+		errtype := own_error.JsonFormatNotValid{Detail_: err.Error()}
+		err = errors.WithStack(own_error.BadRequestError{Detail: errtype})
+		return
+	}
+
+	validate := validator.New()
+	err = validate.Struct(params)
+	if err != nil {
+		errtype := own_error.ParamNotValid{Detail_: err.Error()}
+		err = errors.WithStack(own_error.BadRequestError{Detail: errtype})
+	}
+	return
 }
 
 type UserSettings struct {
@@ -27,14 +43,12 @@ type UserPutParams struct {
 	UserSettings UserSettings `json:"user_settings"`
 }
 
-// ↓ 取得したparamの内容を取得するために、paramsを参照渡ししてメソッド定義
-func (params *UserPutParams) ReadRequestBody(r *http.Request) (err error) {
-	body := make([]byte, r.ContentLength)
-	r.Body.Read(body)
-	err = json.Unmarshal(body, &params)
+func NewUserPutParams(c *gin.Context) (params UserPutParams, err error) {
+	c.ShouldBindJSON(&params)
 	if err != nil {
 		errtype := own_error.JsonFormatNotValid{Detail_: err.Error()}
 		err = errors.WithStack(own_error.BadRequestError{Detail: errtype})
+		return
 	}
 
 	validate := validator.New()
@@ -43,7 +57,7 @@ func (params *UserPutParams) ReadRequestBody(r *http.Request) (err error) {
 		errtype := own_error.ParamNotValid{Detail_: err.Error()}
 		err = errors.WithStack(own_error.BadRequestError{Detail: errtype})
 	}
-	return err
+	return
 }
 
 type SpecifiedResponseParams struct {
@@ -51,22 +65,4 @@ type SpecifiedResponseParams struct {
 	EventID   int       `json:"event_id"`
 	Date      time.Time `json:"date"`
 	IsNeeded  bool      `json:"is_needed"`
-}
-
-func (params *SpecifiedResponseParams) ReadRequestBody(r *http.Request) (err error) {
-	body := make([]byte, r.ContentLength)
-	r.Body.Read(body)
-	err = json.Unmarshal(body, &params)
-	if err != nil {
-		errtype := own_error.JsonFormatNotValid{Detail_: err.Error()}
-		err = errors.WithStack(own_error.BadRequestError{Detail: errtype})
-	}
-
-	validate := validator.New()
-	err = validate.Struct(params)
-	if err != nil {
-		errtype := own_error.ParamNotValid{Detail_: err.Error()}
-		err = errors.WithStack(own_error.BadRequestError{Detail: errtype})
-	}
-	return err
 }

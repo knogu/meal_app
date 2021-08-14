@@ -1,23 +1,21 @@
 package main
 
 import (
-	"net/http"
-
-	"github.com/gorilla/mux"
-
 	"meal_api/data"
 	"meal_api/handler"
+
+	"github.com/gin-gonic/gin"
 )
 
 func main() {
 	data.DBinit()
 
-	r := mux.NewRouter()
+	r := gin.Default()
 	// user
-	r.HandleFunc("/invited_users/{team_uuid}", handler.HandleInvitedUserPost)
-	r.HandleFunc("/organizers", handler.HandleOrganizersPost)
-	r.HandleFunc("/users/{user_id}", handler.HandleUsersPut)
-	r.HandleFunc("/users/{user_id}/responses", handler.HandleResponses)
+	r.POST("/invited_users/:team_uuid", handler.HandleInvitedUserPost)
+	r.POST("/organizers", handler.HandleOrganizersPost)
+	r.PUT("/users/:user_id", handler.HandleUsersPut)
+	r.POST("/users/:user_id/responses", handler.HandleResponsesPost)
 
-	http.ListenAndServe(":80", r)
+	r.Run(":80")
 }

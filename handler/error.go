@@ -1,26 +1,17 @@
 package handler
 
 import (
-	"fmt"
 	"meal_api/own_error"
-	"net/http"
 
+	"github.com/gin-gonic/gin"
 	"github.com/pkg/errors"
 )
 
-func handleError(w http.ResponseWriter, err error) {
+func handleError(c *gin.Context, err error) {
 	switch cause := errors.Cause(err).(type) {
 	case own_error.BadRequestError:
-		cause.Return(w)
+		cause.Return(c)
 	default:
-		process500(w, err)
+		own_error.Process500(c, err)
 	}
-}
-
-func process500(w http.ResponseWriter, err error) {
-	fmt.Printf("%+v\n", err)
-	fmt.Printf("process500")
-	w.WriteHeader(500)
-	w.Header().Set("Content-Type", "application/json")
-	return
 }

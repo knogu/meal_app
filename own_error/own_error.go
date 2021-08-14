@@ -3,9 +3,8 @@ package own_error
 import (
 	"encoding/json"
 	"fmt"
-	"net/http"
 
-	"github.com/pkg/errors"
+	"github.com/gin-gonic/gin"
 )
 
 // インターフェースを満たすものの例: parameter invalid
@@ -134,30 +133,19 @@ func (err BadRequestError) Error() string {
 	return "Summary: " + err.Detail.Summary() + " Detail: " + err.Detail.Detail()
 }
 
-func (badRequest BadRequestError) Return(w http.ResponseWriter) {
+func (badRequest BadRequestError) Return(c *gin.Context) {
 	fmt.Println("4xx Error:", badRequest.Error())
-	w.WriteHeader(badRequest.Detail.StatusCode())
+	// w.WriteHeader(badRequest.Detail.StatusCode())
 	output, err := json.MarshalIndent(ErrJsonOutput{Summary: badRequest.Detail.Summary(), Detail: badRequest.Detail.Detail()}, "", "\t\t")
 	if err != nil {
-		process500(w, err)
+		Process500(c, err)
 	}
-	w.Header().Set("Content-Type", "application/json")
-	w.Write(output)
+	c.JSON(badRequest.Detail.StatusCode(), output)
 }
 
-func handleError(w http.ResponseWriter, err error) {
-	switch cause := errors.Cause(err).(type) {
-	case BadRequestError:
-		cause.Return(w)
-	default:
-		process500(w, err)
-	}
-}
-
-func process500(w http.ResponseWriter, err error) {
+func Process500(c *gin.Context, err error) {
 	fmt.Printf("%+v\n", err)
 	fmt.Printf("process500")
-	w.WriteHeader(500)
-	w.Header().Set("Content-Type", "application/json")
+	c.JSON(500, gin.H{"error": fmt.Sprintf("%+v\n", err)})
 	return
 }
