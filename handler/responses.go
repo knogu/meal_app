@@ -15,7 +15,7 @@ func HandleResponsesPost(c *gin.Context) {
 	}
 	userIDByToken := data.FetchLineProfile(params.LineToken).LineID
 
-	err = AuthorizeResponsesPost(userIDByPath, userIDByToken, params.EventID)
+	err = AuthorizeResponses(userIDByPath, userIDByToken, params.EventID)
 	if err != nil {
 		handleError(c, err)
 	}
@@ -28,7 +28,25 @@ func HandleResponsesPost(c *gin.Context) {
 	return
 }
 
-func AuthorizeResponsesPost(userIDByPath string, userIDByToken string, eventID int) (err error) {
+func HandleResponsesPut(c *gin.Context) {
+	userIDByPath := c.Param("user_id")
+	params, err := json_structs.NewSpecifiedResponseParams(c)
+	if err != nil {
+		handleError(c, err)
+	}
+	userIDByToken := data.FetchLineProfile(params.LineToken).LineID
+
+	err = AuthorizeResponses(userIDByPath, userIDByToken, params.EventID)
+	if err != nil {
+		handleError(c, err)
+	}
+
+	data.Db.Model(&data.Response{}).Where("user_id=? and event_id=? and date=?", userIDByToken, params.EventID, params.Date).Update("is_needed", params.IsNeeded)
+
+	return
+}
+
+func AuthorizeResponses(userIDByPath string, userIDByToken string, eventID int) (err error) {
 	err = data.IsAuthorized(userIDByPath, userIDByToken)
 	if err != nil {
 		return err

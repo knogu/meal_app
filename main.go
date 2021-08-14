@@ -15,7 +15,10 @@ func main() {
 	r.POST("/invited_users/:team_uuid", handler.HandleInvitedUserPost)
 	r.POST("/organizers", handler.HandleOrganizersPost)
 	r.PUT("/users/:user_id", handler.HandleUsersPut)
+
+	// responses
 	r.POST("/users/:user_id/responses", handler.HandleResponsesPost)
+	r.PUT("/users/:user_id/responses", handler.HandleResponsesPut)
 
 	r.Run(":80")
 }
