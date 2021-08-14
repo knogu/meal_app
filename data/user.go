@@ -44,8 +44,8 @@ func CreateUserByRequestBody(rbody json_structs.UserPostRequestBody, team_uuid s
 	return user, errors.WithStack(Result.Error)
 }
 
-func IsAuthorized(user_id string, lineToken string) (err error) {
-	if FetchLineProfile(lineToken).LineID != user_id {
+func IsAuthorized(userIdByPath string, userIdByToken string) (err error) {
+	if userIdByPath != userIdByToken {
 		err = errors.WithStack(own_error.BadRequestError{Detail: own_error.NotAuthorized{}})
 	}
 	return err
@@ -69,4 +69,20 @@ func UpdateUserSetting(user_id string, userSettings json_structs.UserSettings) e
 	user.GetResponseNotifications = userSettings.GetResponseNotifications
 	result := Db.Save(&user)
 	return errors.WithStack(result.Error)
+}
+
+func UserIsAuthorizedEvents(eventID int, userIDByToken string) (err error) {
+	user, err := FetchUserById(userIDByToken)
+	if err != nil {
+		return err
+	}
+	event, err := FetchEventById(eventID)
+	if err != nil {
+		return err
+	}
+
+	if user.TeamUUID != event.TeamUUID {
+		err = errors.WithStack(own_error.BadRequestError{Detail: own_error.NotAuthorized{}})
+	}
+	return err
 }

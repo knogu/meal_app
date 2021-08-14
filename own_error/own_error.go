@@ -106,6 +106,20 @@ func (notAuthorized NotAuthorized) Detail() string {
 	return notAuthorized.Detail_
 }
 
+type EventNotFound struct {
+	Detail_ string
+}
+
+func (eventNotFound EventNotFound) StatusCode() int {
+	return 404
+}
+func (eventNotFound EventNotFound) Summary() string {
+	return "event not found"
+}
+func (eventNotFound EventNotFound) Detail() string {
+	return eventNotFound.Detail_
+}
+
 type MethodNotAllowed struct {
 	Detail_ string
 }

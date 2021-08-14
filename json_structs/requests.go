@@ -60,9 +60,26 @@ func NewUserPutParams(c *gin.Context) (params UserPutParams, err error) {
 	return
 }
 
-type SpecifiedResponseParams struct {
+type ResponsesParams struct {
 	LineToken string    `json:"line_token" validate:"required"`
 	EventID   int       `json:"event_id"`
 	Date      time.Time `json:"date"`
 	IsNeeded  bool      `json:"is_needed"`
+}
+
+func NewSpecifiedResponseParams(c *gin.Context) (params ResponsesParams, err error) {
+	c.ShouldBindJSON(&params)
+	if err != nil {
+		errtype := own_error.JsonFormatNotValid{Detail_: err.Error()}
+		err = errors.WithStack(own_error.BadRequestError{Detail: errtype})
+		return
+	}
+
+	validate := validator.New()
+	err = validate.Struct(params)
+	if err != nil {
+		errtype := own_error.ParamNotValid{Detail_: err.Error()}
+		err = errors.WithStack(own_error.BadRequestError{Detail: errtype})
+	}
+	return
 }
