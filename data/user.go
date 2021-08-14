@@ -53,6 +53,7 @@ func IsAuthorized(userIdByPath string, userIdByToken string) (err error) {
 
 func FetchUserById(user_id string) (user User, err error) {
 	Result := Db.First(&user, "line_id=?", user_id)
+	// todo: Result.Errorが↓以外の場合のハンドリング
 	if errors.Is(Result.Error, gorm.ErrRecordNotFound) {
 		err = errors.WithStack(xer.Err4xx{ErrType: xer.UserNotFound})
 	}

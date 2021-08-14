@@ -11,10 +11,12 @@ var (
 	JsonFormatInvalid = ErrType{StatusCode: 400, Summary: "request json format is invalid. Failed to parse json"}
 	ParamInvalid      = ErrType{StatusCode: 400, Summary: "request json validation failed"}
 	WrongPassword     = ErrType{StatusCode: 400, Summary: "password is wrong"}
+	PathParamInvalid  = ErrType{StatusCode: 400, Summary: "path parameter is invalid"}
 
-	TeamNotFound  = ErrType{StatusCode: 404, Summary: "team not found"}
-	EventNotFound = ErrType{StatusCode: 404, Summary: "event not found"}
-	UserNotFound  = ErrType{StatusCode: 404, Summary: "user not found"}
+	TeamNotFound     = ErrType{StatusCode: 404, Summary: "team not found"}
+	EventNotFound    = ErrType{StatusCode: 404, Summary: "event not found"}
+	UserNotFound     = ErrType{StatusCode: 404, Summary: "user not found"}
+	ResponseNotFound = ErrType{StatusCode: 404, Summary: "response not found"}
 
 	NotAuthorized    = ErrType{StatusCode: 403, Summary: "you are not authorized"}
 	MethodNotAllowed = ErrType{StatusCode: 405, Summary: "Method not allowed"}

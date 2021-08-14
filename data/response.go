@@ -2,6 +2,7 @@ package data
 
 import (
 	"meal_api/json_structs"
+	"meal_api/xer"
 	"time"
 
 	"github.com/pkg/errors"
@@ -29,4 +30,12 @@ func CreateResponseByParams(userID string, params json_structs.ResponsesParams) 
 	result := Db.Create(&response)
 
 	return response, errors.WithStack(result.Error)
+}
+
+func FetchResponseByID(id int) (response Response, err error) {
+	err = Db.First(&response, id).Error
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		err = xer.Err4xx{ErrType: xer.ResponseNotFound}
+	}
+	return response, errors.WithStack(err)
 }

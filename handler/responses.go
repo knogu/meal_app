@@ -3,13 +3,15 @@ package handler
 import (
 	"meal_api/data"
 	"meal_api/json_structs"
+	"meal_api/xer"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
 
 func HandleResponsesPost(c *gin.Context) {
 	userIDByPath := c.Param("user_id")
-	params, err := json_structs.NewSpecifiedResponseParams(c)
+	params, err := json_structs.NewResponseParams(c)
 	if err != nil {
 		handleError(c, err)
 		return
@@ -39,14 +41,25 @@ func HandleResponsesPut(c *gin.Context) {
 		return
 	}
 	userIDByToken := data.FetchLineProfile(params.LineToken).LineID
+	response_id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		handleError(c, err)
+		return
+	}
+	response, err := data.FetchResponseByID(response_id)
+	if err != nil {
+		err = xer.Err4xx{ErrType: xer.PathParamInvalid, Detail: "response id must be parsed into int"}
+		handleError(c, err)
+		return
+	}
 
-	err = AuthorizeResponses(userIDByPath, userIDByToken, params.EventID)
+	err = AuthorizeResponses(userIDByPath, userIDByToken, response.EventID)
 	if err != nil {
 		handleError(c, err)
 		return
 	}
 
-	data.Db.Model(&data.Response{}).Where("user_id=? and event_id=? and date=?", userIDByToken, params.EventID, params.Date).Update("is_needed", params.IsNeeded)
+	data.Db.Model(&data.Response{}).Where("id=?", response_id).Update("is_needed", params.IsNeeded)
 
 	return
 }

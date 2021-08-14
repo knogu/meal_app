@@ -18,7 +18,7 @@ func main() {
 
 	// responses
 	r.POST("/users/:user_id/responses", handler.HandleResponsesPost)
-	r.PUT("/users/:user_id/responses", handler.HandleResponsesPut)
+	r.PUT("/users/:user_id/responses/:id", handler.HandleResponsesPut)
 
 	r.Run(":80")
 }

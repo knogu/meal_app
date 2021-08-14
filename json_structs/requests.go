@@ -63,7 +63,27 @@ type ResponsesParams struct {
 	IsNeeded  bool      `json:"is_needed"`
 }
 
-func NewSpecifiedResponseParams(c *gin.Context) (params ResponsesParams, err error) {
+func NewResponseParams(c *gin.Context) (params ResponsesParams, err error) {
+	c.ShouldBindJSON(&params)
+	if err != nil {
+		err = errors.WithStack(xer.Err4xx{ErrType: xer.JsonFormatInvalid, Detail: err.Error()})
+		return
+	}
+
+	validate := validator.New()
+	err = validate.Struct(params)
+	if err != nil {
+		err = errors.WithStack(xer.Err4xx{ErrType: xer.ParamInvalid, Detail: err.Error()})
+	}
+	return
+}
+
+type SpecifiedResponseParams struct {
+	LineToken string `json:"line_token" validate:"required"`
+	IsNeeded  bool   `json:"is_needed"`
+}
+
+func NewSpecifiedResponseParams(c *gin.Context) (params SpecifiedResponseParams, err error) {
 	c.ShouldBindJSON(&params)
 	if err != nil {
 		err = errors.WithStack(xer.Err4xx{ErrType: xer.JsonFormatInvalid, Detail: err.Error()})
