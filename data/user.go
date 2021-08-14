@@ -26,7 +26,7 @@ type LineProfile struct {
 
 func FetchLineProfile(LineToken string) LineProfile {
 	// todo: LINE platformから取得するように変更
-	return LineProfile{LineID: "id" + LineToken, LineName: "name" + LineToken, PictureURL: "url" + LineToken}
+	return LineProfile{LineID: "id_" + LineToken, LineName: "name_" + LineToken, PictureURL: "url_" + LineToken}
 }
 
 func CreateUserByRequestBody(rbody json_structs.UserPostRequestBody, team_uuid string) (User, error) {
