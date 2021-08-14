@@ -8,7 +8,7 @@ import (
 )
 
 // インターフェースを満たすものの例: parameter invalid
-type SpecifiedBadRequest interface {
+type ErrDescription interface {
 	Summary() string
 	Detail() string
 	StatusCode() int
@@ -135,7 +135,7 @@ func (methodNotAllowed MethodNotAllowed) Detail() string {
 }
 
 type BadRequestError struct {
-	Detail SpecifiedBadRequest
+	ErrDescription
 }
 
 type ErrJsonOutput struct {
@@ -144,17 +144,17 @@ type ErrJsonOutput struct {
 }
 
 func (err BadRequestError) Error() string {
-	return "Summary: " + err.Detail.Summary() + " Detail: " + err.Detail.Detail()
+	return "Summary: " + err.Summary() + " Detail: " + err.Detail()
 }
 
 func (badRequest BadRequestError) Return(c *gin.Context) {
 	fmt.Println("4xx Error:", badRequest.Error())
 	// w.WriteHeader(badRequest.Detail.StatusCode())
-	output, err := json.MarshalIndent(ErrJsonOutput{Summary: badRequest.Detail.Summary(), Detail: badRequest.Detail.Detail()}, "", "\t\t")
+	output, err := json.MarshalIndent(ErrJsonOutput{Summary: badRequest.Summary(), Detail: badRequest.Detail()}, "", "\t\t")
 	if err != nil {
 		Process500(c, err)
 	}
-	c.JSON(badRequest.Detail.StatusCode(), output)
+	c.JSON(badRequest.StatusCode(), output)
 }
 
 func Process500(c *gin.Context, err error) {

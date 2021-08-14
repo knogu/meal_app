@@ -19,7 +19,7 @@ func FetchEventById(id int) (event Event, err error) {
 	Result := Db.First(&event, id)
 	if errors.Is(Result.Error, gorm.ErrRecordNotFound) {
 		err_type := own_error.EventNotFound{}
-		err = own_error.BadRequestError{Detail: err_type}
+		err = own_error.BadRequestError{ErrDescription: err_type}
 	}
 	return event, errors.WithStack(err)
 }

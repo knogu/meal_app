@@ -20,7 +20,7 @@ func NewUserPostRequestBody(c *gin.Context) (params UserPostRequestBody, err err
 	c.ShouldBindJSON(&params)
 	if err != nil {
 		errtype := own_error.JsonFormatNotValid{Detail_: err.Error()}
-		err = errors.WithStack(own_error.BadRequestError{Detail: errtype})
+		err = errors.WithStack(own_error.BadRequestError{ErrDescription: errtype})
 		return
 	}
 
@@ -28,7 +28,7 @@ func NewUserPostRequestBody(c *gin.Context) (params UserPostRequestBody, err err
 	err = validate.Struct(params)
 	if err != nil {
 		errtype := own_error.ParamNotValid{Detail_: err.Error()}
-		err = errors.WithStack(own_error.BadRequestError{Detail: errtype})
+		err = errors.WithStack(own_error.BadRequestError{ErrDescription: errtype})
 	}
 	return
 }
@@ -47,7 +47,7 @@ func NewUserPutParams(c *gin.Context) (params UserPutParams, err error) {
 	c.ShouldBindJSON(&params)
 	if err != nil {
 		errtype := own_error.JsonFormatNotValid{Detail_: err.Error()}
-		err = errors.WithStack(own_error.BadRequestError{Detail: errtype})
+		err = errors.WithStack(own_error.BadRequestError{ErrDescription: errtype})
 		return
 	}
 
@@ -55,7 +55,7 @@ func NewUserPutParams(c *gin.Context) (params UserPutParams, err error) {
 	err = validate.Struct(params)
 	if err != nil {
 		errtype := own_error.ParamNotValid{Detail_: err.Error()}
-		err = errors.WithStack(own_error.BadRequestError{Detail: errtype})
+		err = errors.WithStack(own_error.BadRequestError{ErrDescription: errtype})
 	}
 	return
 }
@@ -71,7 +71,7 @@ func NewSpecifiedResponseParams(c *gin.Context) (params ResponsesParams, err err
 	c.ShouldBindJSON(&params)
 	if err != nil {
 		errtype := own_error.JsonFormatNotValid{Detail_: err.Error()}
-		err = errors.WithStack(own_error.BadRequestError{Detail: errtype})
+		err = errors.WithStack(own_error.BadRequestError{ErrDescription: errtype})
 		return
 	}
 
@@ -79,7 +79,7 @@ func NewSpecifiedResponseParams(c *gin.Context) (params ResponsesParams, err err
 	err = validate.Struct(params)
 	if err != nil {
 		errtype := own_error.ParamNotValid{Detail_: err.Error()}
-		err = errors.WithStack(own_error.BadRequestError{Detail: errtype})
+		err = errors.WithStack(own_error.BadRequestError{ErrDescription: errtype})
 	}
 	return
 }

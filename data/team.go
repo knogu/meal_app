@@ -16,7 +16,7 @@ type Team struct {
 func (team *Team) PasswordIsValid(password string) error {
 	err := bcrypt.CompareHashAndPassword([]byte(team.Password), []byte(password))
 	if err != nil {
-		return own_error.BadRequestError{Detail: own_error.WrongPassword{}}
+		return own_error.BadRequestError{ErrDescription: own_error.WrongPassword{}}
 	}
 	return nil
 }
@@ -26,7 +26,7 @@ func FetchTeamByUUid(uuid string) (Team, error) {
 	var err error
 	result := Db.Where("uuid = ?", uuid).First(&team)
 	if result.Error != nil {
-		err = own_error.BadRequestError{Detail: own_error.TeamNotFound{Detail_: result.Error.Error()}}
+		err = own_error.BadRequestError{ErrDescription: own_error.TeamNotFound{Detail_: result.Error.Error()}}
 	}
 	return team, err
 }

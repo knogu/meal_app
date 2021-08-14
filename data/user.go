@@ -46,7 +46,7 @@ func CreateUserByRequestBody(rbody json_structs.UserPostRequestBody, team_uuid s
 
 func IsAuthorized(userIdByPath string, userIdByToken string) (err error) {
 	if userIdByPath != userIdByToken {
-		err = errors.WithStack(own_error.BadRequestError{Detail: own_error.NotAuthorized{}})
+		err = errors.WithStack(own_error.BadRequestError{ErrDescription: own_error.NotAuthorized{}})
 	}
 	return err
 }
@@ -55,7 +55,7 @@ func FetchUserById(user_id string) (user User, err error) {
 	Result := Db.First(&user, "line_id=?", user_id)
 	if errors.Is(Result.Error, gorm.ErrRecordNotFound) {
 		err_type := own_error.UserNotFound{}
-		err = own_error.BadRequestError{Detail: err_type}
+		err = own_error.BadRequestError{ErrDescription: err_type}
 	}
 	return user, errors.WithStack(err)
 }
@@ -82,7 +82,7 @@ func UserIsAuthorizedEvents(eventID int, userIDByToken string) (err error) {
 	}
 
 	if user.TeamUUID != event.TeamUUID {
-		err = errors.WithStack(own_error.BadRequestError{Detail: own_error.NotAuthorized{}})
+		err = errors.WithStack(own_error.BadRequestError{ErrDescription: own_error.NotAuthorized{}})
 	}
 	return err
 }
