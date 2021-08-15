@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"encoding/json"
 	"fmt"
 	"meal_api/data"
 	"meal_api/json_structs"
@@ -81,12 +80,7 @@ func HandleOrganizersPost(c *gin.Context) {
 		return
 	}
 
-	output, err := json.MarshalIndent(ReturnToOrganizerPost{UUID: team.UUID}, "", "\t\t")
-	if err != nil {
-		handleError(c, err)
-		return
-	}
-	c.JSON(http.StatusOK, output)
+	c.JSON(http.StatusOK, gin.H{"uuid": team.UUID})
 	return
 }
 

@@ -102,6 +102,7 @@ func HandleResponsesDelete(c *gin.Context) {
 	}
 
 	data.Db.Delete(&response)
+	return
 }
 
 func AuthorizeResponses(userIDByPath string, userIDByToken string, eventID int) (err error) {
