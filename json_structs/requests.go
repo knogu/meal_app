@@ -10,7 +10,6 @@ import (
 )
 
 type UserPostRequestBody struct {
-	LineToken                string `json:"line_token" validate:"required"`
 	IsCook                   bool   `json:"is_cook"`
 	GetResponseNotifications bool   `json:"get_response_notifications"`
 	Password                 string `json:"password" validate:"required,min=8,max=30"`
@@ -31,14 +30,9 @@ func NewUserPostRequestBody(c *gin.Context) (params UserPostRequestBody, err err
 	return
 }
 
-type UserSettings struct {
+type UserPutParams struct {
 	IsCook                   bool `json:"is_cook"`
 	GetResponseNotifications bool `json:"get_response_notifications"`
-}
-
-type UserPutParams struct {
-	LineToken    string       `json:"line_token" validate:"required"`
-	UserSettings UserSettings `json:"user_settings"`
 }
 
 func NewUserPutParams(c *gin.Context) (params UserPutParams, err error) {
@@ -57,10 +51,9 @@ func NewUserPutParams(c *gin.Context) (params UserPutParams, err error) {
 }
 
 type ResponsesParams struct {
-	LineToken string    `json:"line_token" validate:"required"`
-	EventID   int       `json:"event_id"`
-	Date      time.Time `json:"date"`
-	IsNeeded  bool      `json:"is_needed"`
+	EventID  int       `json:"event_id"`
+	Date     time.Time `json:"date"`
+	IsNeeded bool      `json:"is_needed"`
 }
 
 func NewResponseParams(c *gin.Context) (params ResponsesParams, err error) {
@@ -79,8 +72,7 @@ func NewResponseParams(c *gin.Context) (params ResponsesParams, err error) {
 }
 
 type UpdateResponseParams struct {
-	LineToken string `json:"line_token" validate:"required"`
-	IsNeeded  bool   `json:"is_needed"`
+	IsNeeded bool `json:"is_needed"`
 }
 
 func NewUpdateResponseParams(c *gin.Context) (params UpdateResponseParams, err error) {

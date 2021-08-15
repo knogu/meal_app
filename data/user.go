@@ -29,8 +29,8 @@ func FetchLineProfile(LineToken string) LineProfile {
 	return LineProfile{LineID: "id_" + LineToken, LineName: "name_" + LineToken, PictureURL: "url_" + LineToken}
 }
 
-func CreateUserByRequestBody(rbody json_structs.UserPostRequestBody, team_uuid string) (User, error) {
-	line_profile := FetchLineProfile(rbody.LineToken)
+func CreateUserByRequestBody(lineToken string, rbody json_structs.UserPostRequestBody, team_uuid string) (User, error) {
+	line_profile := FetchLineProfile(lineToken)
 	user := User{
 		LineID:                   line_profile.LineID,
 		LineName:                 line_profile.LineName,
@@ -60,13 +60,13 @@ func FetchUserById(user_id string) (user User, err error) {
 	return user, errors.WithStack(err)
 }
 
-func UpdateUserSetting(user_id string, userSettings json_structs.UserSettings) error {
+func UpdateUserSetting(user_id string, userPutParams json_structs.UserPutParams) error {
 	user, err := FetchUserById(user_id)
 	if err != nil {
 		return err
 	}
-	user.IsCook = userSettings.IsCook
-	user.GetResponseNotifications = userSettings.GetResponseNotifications
+	user.IsCook = userPutParams.IsCook
+	user.GetResponseNotifications = userPutParams.GetResponseNotifications
 	result := Db.Save(&user)
 	return errors.WithStack(result.Error)
 }

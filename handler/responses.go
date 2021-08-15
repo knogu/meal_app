@@ -11,12 +11,16 @@ import (
 
 func HandleResponsesPost(c *gin.Context) {
 	userIDByPath := c.Param("user_id")
+	lineToken, err := validateLineToken(c)
+	if err != nil {
+		return
+	}
 	params, err := json_structs.NewResponseParams(c)
 	if err != nil {
 		handleError(c, err)
 		return
 	}
-	userIDByToken := data.FetchLineProfile(params.LineToken).LineID
+	userIDByToken := data.FetchLineProfile(lineToken).LineID
 
 	err = AuthorizeResponses(userIDByPath, userIDByToken, params.EventID)
 	if err != nil {
@@ -58,12 +62,17 @@ func validateSpecifiedResponse(c *gin.Context, lineToken string) (response data.
 }
 
 func HandleResponsesPut(c *gin.Context) {
+	lineToken, err := validateLineToken(c)
+	if err != nil {
+		return
+	}
+
 	param, err := json_structs.NewUpdateResponseParams(c)
 	if err != nil {
 		handleError(c, err)
 		return
 	}
-	response, err := validateSpecifiedResponse(c, param.LineToken)
+	response, err := validateSpecifiedResponse(c, lineToken)
 	if err != nil {
 		return
 	}

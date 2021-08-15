@@ -2,6 +2,7 @@ package handler
 
 import (
 	"encoding/json"
+	"fmt"
 	"meal_api/data"
 	"meal_api/json_structs"
 	"net/http"
@@ -10,14 +11,15 @@ import (
 )
 
 func HandleInvitedUserPost(c *gin.Context) {
-	team_uuid := c.Param("team_uuid")
-	team, err := data.FetchTeamByUUid(team_uuid)
+	teamUUID := c.Param("team_uuid")
+	team, err := data.FetchTeamByUUid(teamUUID)
 	if err != nil {
 		handleError(c, err)
 		return
 	}
 
 	params, err := json_structs.NewUserPostRequestBody(c)
+	fmt.Println(params)
 	if err != nil {
 		handleError(c, err)
 		return
@@ -29,7 +31,13 @@ func HandleInvitedUserPost(c *gin.Context) {
 		return
 	}
 
-	_, err = data.CreateUserByRequestBody(params, team.UUID)
+	lineToken, err := validateLineToken(c)
+	if err != nil {
+		handleError(c, err)
+		return
+	}
+
+	_, err = data.CreateUserByRequestBody(lineToken, params, team.UUID)
 	if err != nil {
 		handleError(c, err)
 		return
@@ -55,7 +63,13 @@ func HandleOrganizersPost(c *gin.Context) {
 		return
 	}
 
-	_, err = data.CreateUserByRequestBody(params, team.UUID)
+	lineToken, err := validateLineToken(c)
+	if err != nil {
+		handleError(c, err)
+		return
+	}
+
+	_, err = data.CreateUserByRequestBody(lineToken, params, team.UUID)
 	if err != nil {
 		handleError(c, err)
 		return
@@ -84,13 +98,19 @@ func HandleUsersPut(c *gin.Context) {
 		return
 	}
 
-	err = data.IsAuthorized(user_id, params.LineToken)
+	lineToken, err := validateLineToken(c)
 	if err != nil {
 		handleError(c, err)
 		return
 	}
 
-	err = data.UpdateUserSetting(user_id, params.UserSettings)
+	err = data.IsAuthorized(user_id, data.FetchLineProfile(lineToken).LineID)
+	if err != nil {
+		handleError(c, err)
+		return
+	}
+
+	err = data.UpdateUserSetting(user_id, params)
 	if err != nil {
 		handleError(c, err)
 	}
