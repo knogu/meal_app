@@ -19,6 +19,7 @@ func main() {
 	// responses
 	r.POST("/users/:user_id/responses", handler.HandleResponsesPost)
 	r.PUT("/users/:user_id/responses/:id", handler.HandleResponsesPut)
+	r.DELETE("/users/:user_id/responses/:id", handler.HandleResponsesDelete)
 
 	r.Run(":80")
 }

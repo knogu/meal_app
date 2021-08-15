@@ -78,12 +78,12 @@ func NewResponseParams(c *gin.Context) (params ResponsesParams, err error) {
 	return
 }
 
-type SpecifiedResponseParams struct {
+type UpdateResponseParams struct {
 	LineToken string `json:"line_token" validate:"required"`
 	IsNeeded  bool   `json:"is_needed"`
 }
 
-func NewSpecifiedResponseParams(c *gin.Context) (params SpecifiedResponseParams, err error) {
+func NewUpdateResponseParams(c *gin.Context) (params UpdateResponseParams, err error) {
 	c.ShouldBindJSON(&params)
 	if err != nil {
 		err = errors.WithStack(xer.Err4xx{ErrType: xer.JsonFormatInvalid, Detail: err.Error()})

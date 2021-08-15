@@ -12,6 +12,7 @@ var (
 	ParamInvalid      = ErrType{StatusCode: 400, Summary: "request json validation failed"}
 	WrongPassword     = ErrType{StatusCode: 400, Summary: "password is wrong"}
 	PathParamInvalid  = ErrType{StatusCode: 400, Summary: "path parameter is invalid"}
+	MissingLineToken  = ErrType{StatusCode: 400, Summary: "line token is missing"}
 
 	TeamNotFound     = ErrType{StatusCode: 404, Summary: "team not found"}
 	EventNotFound    = ErrType{StatusCode: 404, Summary: "event not found"}

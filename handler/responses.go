@@ -33,20 +33,15 @@ func HandleResponsesPost(c *gin.Context) {
 	return
 }
 
-func HandleResponsesPut(c *gin.Context) {
+func validateSpecifiedResponse(c *gin.Context, lineToken string) (response data.Response, err error) {
 	userIDByPath := c.Param("user_id")
-	params, err := json_structs.NewSpecifiedResponseParams(c)
-	if err != nil {
-		handleError(c, err)
-		return
-	}
-	userIDByToken := data.FetchLineProfile(params.LineToken).LineID
+	userIDByToken := data.FetchLineProfile(lineToken).LineID
 	response_id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		handleError(c, err)
 		return
 	}
-	response, err := data.FetchResponseByID(response_id)
+	response, err = data.FetchResponseByID(response_id)
 	if err != nil {
 		err = xer.Err4xx{ErrType: xer.PathParamInvalid, Detail: "response id must be parsed into int"}
 		handleError(c, err)
@@ -59,9 +54,45 @@ func HandleResponsesPut(c *gin.Context) {
 		return
 	}
 
-	data.Db.Model(&data.Response{}).Where("id=?", response_id).Update("is_needed", params.IsNeeded)
-
 	return
+}
+
+func HandleResponsesPut(c *gin.Context) {
+	param, err := json_structs.NewUpdateResponseParams(c)
+	if err != nil {
+		handleError(c, err)
+		return
+	}
+	response, err := validateSpecifiedResponse(c, param.LineToken)
+	if err != nil {
+		return
+	}
+	response.IsNeeded = param.IsNeeded
+
+	data.Db.Save(&response)
+	return
+}
+
+func validateLineToken(c *gin.Context) (lineToken string, err error) {
+	lineToken = c.Query("line_token")
+	if len(lineToken) == 0 {
+		err = xer.Err4xx{ErrType: xer.MissingLineToken}
+	}
+	return lineToken, err
+}
+
+func HandleResponsesDelete(c *gin.Context) {
+	lineToken, err := validateLineToken(c)
+	if err != nil {
+		return
+	}
+
+	response, err := validateSpecifiedResponse(c, lineToken)
+	if err != nil {
+		return
+	}
+
+	data.Db.Delete(&response)
 }
 
 func AuthorizeResponses(userIDByPath string, userIDByToken string, eventID int) (err error) {
