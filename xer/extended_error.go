@@ -13,6 +13,7 @@ var (
 	WrongPassword     = ErrType{StatusCode: 400, Summary: "password is wrong"}
 	PathParamInvalid  = ErrType{StatusCode: 400, Summary: "path parameter is invalid"}
 	MissingLineToken  = ErrType{StatusCode: 400, Summary: "line token is missing"}
+	TimeParseFailed   = ErrType{StatusCode: 400, Summary: "time can't be parsed. format is wrong."}
 
 	TeamNotFound     = ErrType{StatusCode: 404, Summary: "team not found"}
 	EventNotFound    = ErrType{StatusCode: 404, Summary: "event not found"}

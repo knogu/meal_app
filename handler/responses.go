@@ -1,10 +1,13 @@
 package handler
 
 import (
+	"fmt"
 	"meal_api/data"
 	"meal_api/json_structs"
 	"meal_api/xer"
+	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -13,6 +16,7 @@ func HandleResponsesPost(c *gin.Context) {
 	userIDByPath := c.Param("user_id")
 	lineToken, err := validateLineToken(c)
 	if err != nil {
+		handleError(c, err)
 		return
 	}
 	params, err := json_structs.NewResponseParams(c)
@@ -64,6 +68,7 @@ func validateSpecifiedResponse(c *gin.Context, lineToken string) (response data.
 func HandleResponsesPut(c *gin.Context) {
 	lineToken, err := validateLineToken(c)
 	if err != nil {
+		handleError(c, err)
 		return
 	}
 
@@ -74,6 +79,7 @@ func HandleResponsesPut(c *gin.Context) {
 	}
 	response, err := validateSpecifiedResponse(c, lineToken)
 	if err != nil {
+		handleError(c, err)
 		return
 	}
 	response.IsNeeded = param.IsNeeded
@@ -93,11 +99,13 @@ func validateLineToken(c *gin.Context) (lineToken string, err error) {
 func HandleResponsesDelete(c *gin.Context) {
 	lineToken, err := validateLineToken(c)
 	if err != nil {
+		handleError(c, err)
 		return
 	}
 
 	response, err := validateSpecifiedResponse(c, lineToken)
 	if err != nil {
+		handleError(c, err)
 		return
 	}
 
@@ -112,4 +120,36 @@ func AuthorizeResponses(userIDByPath string, userIDByToken string, eventID int) 
 	}
 	err = data.UserIsAuthorizedEvents(eventID, userIDByToken)
 	return err
+}
+
+var (
+	indexDaysDuration = 10
+)
+
+func HandleResponsesGet(c *gin.Context) {
+	lineToken, err := validateLineToken(c)
+	if err != nil {
+		handleError(c, err)
+		return
+	}
+	userIDByToken := data.FetchLineProfile(lineToken).LineID
+	err = data.IsAuthorizedInTeam(userIDByToken, c.Query("user_id"))
+	if err != nil {
+		handleError(c, err)
+		return
+	}
+	user, err := data.FetchUserById(userIDByToken)
+	t, err := time.Parse(time.RFC3339, c.Query("from_date"))
+	if err != nil {
+		handleError(c, xer.Err4xx{ErrType: xer.TimeParseFailed})
+		return
+	}
+	eventsJSON, err := user.EventsWithResponses(t, indexDaysDuration)
+	if err != nil {
+		handle500(c, err)
+		return
+	}
+	fmt.Printf("eventsJSON: %+v", eventsJSON)
+	c.JSON(http.StatusOK, eventsJSON)
+	return
 }

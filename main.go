@@ -17,6 +17,7 @@ func main() {
 	r.PUT("/users/:user_id", handler.HandleUsersPut)
 
 	// responses
+	r.GET("/users/:user_id/responses", handler.HandleResponsesGet)
 	r.POST("/users/:user_id/responses", handler.HandleResponsesPost)
 	r.PUT("/users/:user_id/responses/:id", handler.HandleResponsesPut)
 	r.DELETE("/users/:user_id/responses/:id", handler.HandleResponsesDelete)

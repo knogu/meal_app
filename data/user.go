@@ -3,6 +3,8 @@ package data
 import (
 	"meal_api/json_structs"
 	"meal_api/xer"
+	"sort"
+	"time"
 
 	"github.com/pkg/errors"
 	"gorm.io/gorm"
@@ -85,4 +87,71 @@ func UserIsAuthorizedEvents(eventID int, userIDByToken string) (err error) {
 		err = errors.WithStack(xer.Err4xx{ErrType: xer.NotAuthorized})
 	}
 	return err
+}
+
+func IsAuthorizedInTeam(lineIDByToken string, targetLineID string) (err error) {
+	isSelf := lineIDByToken == targetLineID
+	requester, err := FetchUserById(targetLineID)
+	if err != nil {
+		return err
+	}
+	target, err := FetchUserById(targetLineID)
+	if err != nil {
+		return err
+	}
+	isCook := requester.IsCook && requester.Team.UUID == target.Team.UUID
+	if (!isSelf) && !(isCook) {
+		return xer.Err4xx{ErrType: xer.NotAuthorized}
+	}
+	return
+}
+
+type DateEventsJson struct {
+	Date   time.Time
+	Events []EventResponseJson
+}
+
+type EventResponseJson struct {
+	ID   uint
+	Name string
+	// ↓nullを許容する
+	Response interface{}
+}
+
+type ResponseJson struct {
+	ResponseID uint
+	UserID     string
+	IsNeeded   bool
+}
+
+func (user *User) EventsWithResponses(from time.Time, days int) (dateEvents []DateEventsJson, err error) {
+	var Events EventList
+	Db.Where("team_uuid = ?", user.TeamUUID).Find(&Events)
+	sort.Sort(Events)
+	for i := 0; i < days; i++ {
+		var eventResponses []EventResponseJson
+		Date := from.AddDate(0, 0, i)
+		for _, event := range Events {
+			var eventResponse EventResponseJson
+			event.setIDandName2Json(&eventResponse)
+			eventResponses = append(eventResponses, eventResponse)
+			Response, err_reponse := FetchResponseByMultipleKeys(user.LineID, event.ID, Date)
+			if err_reponse != nil {
+				switch errors.Cause(err_reponse).(type) {
+				case xer.Err4xx:
+					continue
+				default:
+					return dateEvents, err_reponse
+				}
+			}
+			responseJson := ResponseJson{ResponseID: Response.ID, IsNeeded: Response.IsNeeded}
+			eventResponses[len(eventResponses)-1].Response = responseJson
+		}
+		var dateEvent DateEventsJson
+		dateEvent.Date = Date
+		dateEvent.Events = eventResponses
+		dateEvents = append(dateEvents, dateEvent)
+	}
+
+	return dateEvents, nil
 }

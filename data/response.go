@@ -39,3 +39,11 @@ func FetchResponseByID(id int) (response Response, err error) {
 	}
 	return response, errors.WithStack(err)
 }
+
+func FetchResponseByMultipleKeys(user_id string, event_id uint, date time.Time) (response Response, err error) {
+	err = Db.Where("user_id = ? and event_id = ? and date = ?", user_id, event_id, date).First(&response).Error
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		err = xer.Err4xx{ErrType: xer.ResponseNotFound}
+	}
+	return response, errors.WithStack(err)
+}
