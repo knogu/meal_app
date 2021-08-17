@@ -29,7 +29,7 @@ func FetchEventById(id int) (event Event, err error) {
 	return event, errors.WithStack(err)
 }
 
-func (event Event) setIDandName2Json(eventResponses *EventResponseJson) {
-	eventResponses.ID = event.ID
-	eventResponses.Name = event.Name
+func (event Event) setIDandName2Json(eventsListJson *EventJson) {
+	eventsListJson.ID = event.ID
+	eventsListJson.Name = event.Name
 }

@@ -106,12 +106,12 @@ func IsAuthorizedInTeam(lineIDByToken string, targetLineID string) (err error) {
 	return
 }
 
-type DateEventsJson struct {
+type DateJson struct {
 	Date   time.Time
-	Events []EventResponseJson
+	Events []EventJson
 }
 
-type EventResponseJson struct {
+type EventJson struct {
 	ID   uint
 	Name string
 	// ↓nullを許容する
@@ -124,32 +124,32 @@ type ResponseJson struct {
 	IsNeeded   bool
 }
 
-func (user *User) EventsWithResponses(from time.Time, days int) (dateEvents []DateEventsJson, err error) {
+func (user *User) EventsWithResponses(from time.Time, days int) (dateEvents []DateJson, err error) {
 	var Events EventList
 	Db.Where("team_uuid = ?", user.TeamUUID).Find(&Events)
 	sort.Sort(Events)
 	for i := 0; i < days; i++ {
-		var eventResponses []EventResponseJson
+		var eventsListJson []EventJson
 		Date := from.AddDate(0, 0, i)
 		for _, event := range Events {
-			var eventResponse EventResponseJson
-			event.setIDandName2Json(&eventResponse)
-			eventResponses = append(eventResponses, eventResponse)
-			Response, err_reponse := FetchResponseByMultipleKeys(user.LineID, event.ID, Date)
-			if err_reponse != nil {
-				switch errors.Cause(err_reponse).(type) {
+			var eventJson EventJson
+			event.setIDandName2Json(&eventJson)
+			eventsListJson = append(eventsListJson, eventJson)
+			Response, errTemp := FetchResponseByMultipleKeys(user.LineID, event.ID, Date)
+			if errTemp != nil {
+				switch errors.Cause(errTemp).(type) {
 				case xer.Err4xx:
 					continue
 				default:
-					return dateEvents, err_reponse
+					return dateEvents, errTemp
 				}
 			}
-			responseJson := ResponseJson{ResponseID: Response.ID, IsNeeded: Response.IsNeeded}
-			eventResponses[len(eventResponses)-1].Response = responseJson
+			responseJson := ResponseJson{ResponseID: Response.ID, IsNeeded: Response.IsNeeded, UserID: Response.UserID}
+			eventsListJson[len(eventsListJson)-1].Response = responseJson
 		}
-		var dateEvent DateEventsJson
+		var dateEvent DateJson
 		dateEvent.Date = Date
-		dateEvent.Events = eventResponses
+		dateEvent.Events = eventsListJson
 		dateEvents = append(dateEvents, dateEvent)
 	}
 

@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"fmt"
 	"meal_api/data"
 	"meal_api/json_structs"
 	"meal_api/xer"
@@ -149,7 +148,40 @@ func HandleResponsesGet(c *gin.Context) {
 		handle500(c, err)
 		return
 	}
-	fmt.Printf("eventsJSON: %+v", eventsJSON)
+
+	c.JSON(http.StatusOK, eventsJSON)
+	return
+}
+
+func HandleTeamResponsesGet(c *gin.Context) {
+	lineToken, err := validateLineToken(c)
+	if err != nil {
+		handleError(c, err)
+		return
+	}
+	userIDByToken := data.FetchLineProfile(lineToken).LineID
+	user, err := data.FetchUserById(userIDByToken)
+	if err != nil {
+		handleError(c, err)
+		return
+	}
+	team, err := data.FetchTeamByUUid(user.TeamUUID)
+	if err != nil {
+		handleError(c, err)
+		return
+	}
+	t, err := time.Parse(time.RFC3339, c.Query("from_date"))
+	if err != nil {
+		handleError(c, xer.Err4xx{ErrType: xer.TimeParseFailed})
+		return
+	}
+
+	eventsJSON, err := team.EventsWithResponses(t, indexDaysDuration)
+	if err != nil {
+		handle500(c, err)
+		return
+	}
+
 	c.JSON(http.StatusOK, eventsJSON)
 	return
 }
